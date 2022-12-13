@@ -1,5 +1,12 @@
-## LAB 1
+# Mario-Kart Inspired Racing Game Final Project
 
-### LAB 1
+## Project Introduction
 
-test
+## High Level Design
+
+### High Level Hardware Design
+
+### High Level Software Design
+
+
+
