@@ -92,6 +92,19 @@ Once the marker has been hit, the marker is then erased using a simple fillRect,
 
 #### Car Position Control (IMU)
 
+From the data sheet, it was determined that the 0x3B
+register must be written to in order to queue the accelerometer data and the 0x43 register must be
+written to in order to buffer in gyroscope data. To achieve these writes, the i2c_write_blocking
+function with parameters including the address of the device (0x68) and  memory address of the
+variable storing the register value. To read in the queued value (6 bytes for the accelerometer - 2
+for x, y, z & 6 byes for for gyroscope - 2 for roll, pitch, yaw), the i2c_read_blocking method with
+the device address, the address to write to, and the number of bytes is used. Each of the 3 values
+of the acceleration and the angular rate is found by OR’ing the 2 byte reads that compose the top
+and bottom half.
+
+To translate the complementary angle to the vga screen, the value is simply divided by -3. This allows for the eventual horizontal wrapping of the car and also makes the controls more sensitive, making the game more challenging. The starting position of the car is the middle of the screen, and any shifts away from the zero derive from the rotational translation of the IMU. 
+
+
 #### Road Curvature
 
 #### Horizontal Wrapping (Road)
