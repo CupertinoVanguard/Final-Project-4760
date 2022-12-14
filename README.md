@@ -51,6 +51,9 @@ The hardware for our controller is straightforward and concise. All circuitry is
 ![image](vibration_motor.png)
 *Figure 2: Vibration Motor Circuitry*
 
+![image](lid_model.png)
+*Figure 3: 3D Model of container*
+
 ### Hardware Container
 
 In order to provide a better user experience for the player and ensure the players safety, we wanted to put all the circuitry and breadboard wiring into a rectangular box. The player would then hold the box in one hand and use it as a remote. The original plan was to place the breadboard in a 3D printed container, but we ran out of time to print it for the demo. Instead, we used some cardboard to create a similar version of the 3D printer. This cardboard container can be opened up and closed, and has holes for all the wiring. The controller used in the demo was the cardboard container controller.
