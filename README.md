@@ -2,6 +2,10 @@
 
 ## Project Introduction
 
+Our final project is an arcade style racing game that is controlled using a handheld controller, inspired from mario-kart style games we played growing up. 
+
+The car and the randomly curving track are displayed on a VGA screen which is connected to the controller. Both the car and track are able to horizontally wrap across the screen. As the game progresses, the track scrolls down on the screen and the player must use the controller to steer the car away from the edges of the track. Hitting the edge will result in a game over. There are also randomly generated (green “line”) markers along the track that the player needs to hit to increase their score. However, hitting a marker will also cause the game to speed up, adding more difficulty as the score increases; additionally, whenever a marker is hit, a Spotify song with increasing tempo begins playing and a vibration sensor provides tactile feedback. We decided to make this our final project because we wanted a project that was engaging, fun, and easy to play. The technical details of the project also draw heavily from what we have learned from the previous labs.
+
 ## High Level Design
 
 The inspiration for our project came from the game Mario Kart Wii. The core structure of a Mario Kart game consists of a player vehicle, the track, a lap counter, and a motion controller. We took these core ideas and did our best to implement them using the PICO and VGA screen. 
