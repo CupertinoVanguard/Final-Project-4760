@@ -102,7 +102,7 @@ the device address, the address to write to, and the number of bytes is used. Ea
 of the acceleration and the angular rate is found by OR’ing the 2 byte reads that compose the top
 and bottom half.
 
-To translate the complementary angle to the vga screen, the value is simply divided by -3. This allows for the eventual horizontal wrapping of the car and also makes the controls more sensitive, making the game more challenging. The starting position of the car is the middle of the screen, and any shifts away from the zero derive from the rotational translation of the IMU. 
+To translate the complementary angle to the vga screen, the value is simply divided by -3. This value was experimentally chosen as it provided the best control over the movement of the car and had an acceptable reaction time. This allows for the eventual horizontal wrapping of the car and also makes the controls more sensitive, making the game more challenging. The starting position of the car is the middle of the screen, and any shifts away from the zero derive from the rotational translation of the IMU. 
 
 
 #### Road Curvature
