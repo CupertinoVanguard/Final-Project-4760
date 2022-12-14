@@ -54,6 +54,9 @@ The hardware for our controller is straightforward and concise. All circuitry is
 ![image](lid_model.png)
 *Figure 3: 3D Model of container*
 
+![image](circuit.png)
+*Figure 4: Image of Circuit*
+
 ### Hardware Container
 
 In order to provide a better user experience for the player and ensure the players safety, we wanted to put all the circuitry and breadboard wiring into a rectangular box. The player would then hold the box in one hand and use it as a remote. The original plan was to place the breadboard in a 3D printed container, but we ran out of time to print it for the demo. Instead, we used some cardboard to create a similar version of the 3D printer. This cardboard container can be opened up and closed, and has holes for all the wiring. The controller used in the demo was the cardboard container controller.
@@ -82,6 +85,7 @@ The ring buffer, in this way, facilitated expanding the state properties of the 
 It was a little difficult to understand how the ring buffer was operating (two pointers chasing each other around a static memory space), but it was worth spending some time to understand it, as the relative performance increase due to using a ring buffer was necessary to implement functional scrolling. 
 
 ![image](road_prop.png)
+*Figure 5: Image of struct utilized*
 
 Road_prop is the struct that was used to keep track of all of the data associated with a particular pixel on the track. The reason for having to keep track of all of this positional state information (l_xpos, r_xpos, y_pos) for each ring buffer track element was due to the challenges of wrapping and erasing previously drawn elements. This motivation will be covered in greater detail in the wrapping description section. 
  
@@ -117,6 +121,7 @@ To translate the complementary angle to the vga screen, the value is simply divi
 In order to produce the random curves in the track visible in the game, a basic strategy was implemented. The track is broken down into linear segments of a randomly sampled length, sampled from the following range: [10,20,30,40,50,60,70]. The slope of the line (pixel increment in x-direction) is also randomly sampled within the following range: [-6,-4,-2,0,2,4,6]. A counter (init_curve) counts up to the randomly sampled length (curve_len), and increments each pixel that is plotted (+= 1 each frame) by the corresponding randomly sampled slope (inc_val). When init_curve == curve_len, init_curve is reset to 0 and the two random variables are resampled. In this way, the track randomly builds itself as time goes on. These parameters were qualitatively adjusted to make the game playable and fun. 
 
 ![image](gameplay_img.png)
+*Figure 6: Curvature Example*
 
 #### Horizontal Wrapping (Road)
 
@@ -135,6 +140,7 @@ Erasing of these track pixels each frame was also made significantly easier with
 The most efficient way to implement collision was just to keep track of whether the top or bottom of the car is in collision, as depicted in Figure b. To do this, top_car_coll and bot_car_coll were pointers to locations in the ring buffer relative to the top of the ring buffer (pointerEnd), corresponding to the y-pixel positions of the top and bottom of the car. Each frame these pointers would also be incremented, along with pointerEnd, so they retained the same offset from the top of the VGA screen– since the car always maintains the same y-pos. 
 
 ![image](colliders.png)
+*Figure 7: Car Collision Diagram*
 
 The initial implementation of colliders for the track used basic equality operators to check if the current_x position of the car was within a specified range of the track. This doesn’t work too well with wrapping. The inclusion of l_xpos and r_xpos made checking for collisions easier as well, especially with car wrapping. The better strategy was to compute the absolute difference between the car’s position and the track boundaries, and if the difference was less than 2, report a collision. Essentially this meant comparing l_xpos and r_xpos corresponding to the top_car_coll and bot_car_coll to the current position of the car. 
 
@@ -152,16 +158,19 @@ The ‘rese’ UART message is set when the entire game is reset (after a collis
 Upon receiving a ‘next’ message on the Python side, the next song of increasing tempo (from the list) is played. Upon receiving a ‘rese’ message on the Python side, the next song that is played is the first one on the playlist. The Python code implementing this logic is below. 
 
 ![image](spotify_code.png)
+*Figure 8: Code for Spotify*
 
 #### Reset/ Game End
 
 The below figure shows the message printed out to the player on the VGA (using provided VGA setCursor and writeString) when they hit a track boundary. To reset the game, we keep track of a boolean play_again, that is initially set to False. Our main code game loop runs when this variable is set to True, which is possible whenever the hardware button is pressed when the screen below is visible to the player. This loop variable is reset to False immediately after hitting a track boundary, breaking out of the main game loop.  
 
 ![image](reset_game.png)
+*Figure 9: Game Reset Image*
 
 The below figure shows the message printed out to the player when they win the game, which happens when 20 green markers have been hit. 
 
 ![image](win_game.png)
+*Figure 10: Game Won Image*
 
 
 #### Optimizations
@@ -200,14 +209,18 @@ The group approves the video for inclusion on the course youtube channel.
 
 Datasheets:
 
-MPU6050: [1](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf)
+MPU6050: [MPU 6050 Datasheet](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf)
 
 Contribution:
 
 Kevin Guo: Hardware Design - container design and circuit assembly
+
 Shreshta Obla: Software Design - Car and Road Wrapping, Curvatures, and Spotify
+
 Nikhil Satheesh Pillai: Software Design - Marker Generation, Speed, Optimization, Ring Buffer
 
+## Appendix C
 
+Code: [Final Code](https://github.coecis.cornell.edu/sko35/4760finalcode)
 
 
