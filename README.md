@@ -40,9 +40,92 @@ The hardware for our controller is straightforward and concise. All circuitry is
 ![image](vibration_motor.png)
 *Figure 2: Vibration Motor Circuitry*
 
+### Hardware Container
+
+In order to provide a better user experience for the player and ensure the players safety, we wanted to put all the circuitry and breadboard wiring into a rectangular box. The player would then hold the box in one hand and use it as a remote. The original plan was to place the breadboard in a 3D printed container, but we ran out of time to print it for the demo. Instead, we used some cardboard to create a similar version of the 3D printer. This cardboard container can be opened up and closed, and has holes for all the wiring. The controller used in the demo was the cardboard container controller.
 
 
-### High Level Software Design
+## Software Design
+
+There are three main parts to the software: main game thread, spotify thread, main
+
+Main Game Thread: The main game thread handles the key aspects of the game including path wrapping, car-wrapping, ring-buffer updates, road and marker collision detection, core updates, and frame updates. Additionally, at each marker hit, the main thread also signals a shared spotify variable to indicate a new track switch.
+
+Serial Spotify Thread: This thread runs on core 1 and concurrently reads the shared spotify_signal variable to recognize if a “next” (indicating switch to the next song in the queue) must be sent to the spotify script. The thread avoids race conditions by only reading the variable as opposed to also writing to it. When the game is reset, a “rese” is sent, resetting the song queue. 
+
+Main: The main handles initializing the GPIO interrupt for the IMU. This pulsed signal on the gpis pin determines when the data should be read from the IMU’s buffer. Additionally, the main also assigns the game thread to core 0 and the serial/spotify thread to core 1. Lastly, it assigns the PWM functionality to the vibration motor, setting the PWM max threshold to 12. 
+
+### Software Specifics
+
+#### Ring Buffer (vertical wrapping)
+
+Vertical scrolling was pivotal to create the effect of the road moving from the top to the bottom of the screen and the car moving forward. While the trivial strategy of simply redrawing the pixels in the same location iteratively was considered, this strategy would severely limit the road’s ability to hold properties such as curvature, obstacles, power-ups, and colors, several limiting the difficulty and fun of the game. 
+ 
+To cycle the properties of the road down, two strategies were considered: the ring buffer and bubbling. The bubbling straggles would involve looping through the entire array and manually bubbling properties down through the entire array. This is a rather inefficient approach and would limit the amount of game logic calculations that can be be carried out. The ring buffer approach is an efficient approach that utilizes pointers to indices in the array, and rather than manually bubbling data, only the pointers are shifted by 1 per iteration. The road state pointed to by the top pointer is then update with new properties rendering a new road state at the top of the vga screen. The previous states are naturally pushed down as the road is redrawn on the vga from the new top pointer to the new bottom pointer. 
+ 
+The ring buffer, in this way, facilitated expanding the state properties of the road and only required a single index update per frame. The ring buffer strategy integrated rather well with the array design structure chosen initially as only two pointer had to be tracked: pointerEnd and pointerStart. 
+ 
+It was a little difficult to understand how the ring buffer was operating (two pointers chasing each other around a static memory space), but it was worth spending some time to understand it, as the relative performance increase due to using a ring buffer was necessary to implement functional scrolling. 
+
+![image](road_prop.png)
+
+Road_prop is the struct that was used to keep track of all of the data associated with a particular pixel on the track. The reason for having to keep track of all of this positional state information (l_xpos, r_xpos, y_pos) for each ring buffer track element was due to the challenges of wrapping and erasing previously drawn elements. This motivation will be covered in greater detail in the wrapping description section. 
+ 
+An added bonus to the road_prop struct was the colorData, which enabled keeping track of the color of a particular element of the array, so we were able to generate a Mario Kart “Rainbow-Road” like effect by incrementing a counter for subsequent pixels added and changing the color when that count threshold was reached. The boundaries of the track in Figure a exhibits this behavior. 
+
+#### Marker Generation & Deletion
+
+To generate markers, each road was provided a marker state. This character property effectively indicated the directional placement of the marker. 
+ 
+To initially generate the marker, a random value was first selected. To control the probability of the marker generation, it is only generated when when the random value is above 48 in a range of 0 to 50 inclusive. This ultimately results in a generation probability of 4%. To avoid multiple markers to be generated when the existing marker is yet to be hit or hasn’t passed through the car’s current position, a marker_gen boolean is tracked. This allows knowing if the previous marker has been hit and if a new marker has been generated. To updates the road’s properties, the marker length is assigned to a random value between 40 to 90 pixels and the direction is assigned based on marker length. Generally, longer length markers are favored on the left side while shorter length markers are favored on right side. The directional position of the marker is indicated by updating the obstacle character property to ‘1’ to indicate a left directionally positioned marker and ‘2’ for a right directionally positioned marker. Drawing the marker then becomes a rather trivial task as the pixel it is attached to is known and so its length. The drawing logic is, thus, then embedded into the main road-drawing loop.
+ 
+To identify the marker has been hit by the top line of the car, the car’s current top line position is compared to the current pixel’s obstacle position. If the marker is right sided, the absolute difference between the right corner and the pixel’s location is considered. If the difference falls within the range of the marker in that position, the boolean tracking a hit is set high. A similar logic is followed for left sided markers.
+ 
+Once the marker has been hit, the marker is then erased using a simple fillRect, the spotify is signaled, marker_gen is flagged to be false, the pixelData array obstacle character is set to N (indicating no marker), the vibration logic is activated, and the score is incremented.
+
+#### Car Position Control (IMU)
+
+#### Road Curvature
+
+#### Horizontal Wrapping (Road)
+
+Implementing horizontal wrapping for the road was probably one of the most challenging aspects of this project. The primary issue was that markers, erasing, and how the road itself wraps would have to change as a result of the road wrapping. 
+
+Prior to implementing wrapping, road_prop only contained one x_pos element to keep track of horizontal positional state of just one of the two track boundaries. This was possible, because whenever the road would deviate from going straight forward, both lines would be incremented by the same amount so the other line could just be offset from the other element. However, things started getting complex when one road wrapped around, and roads started to change slope increments. In addition, keeping track of l_xpos and r_xpos separately made collision detection and erasing easier. 
+
+It also became necessary to keep track of y_pos of each pixel in order to perform erasing easily. Because the pointerEnd of the ring buffer is constantly shifting down, it is not possible to determine what the y_pos of each track element (after a frame update) is without keeping track for each element. It was also used in the case of erasing a marker when it is hit. One issue we ran into relating to this was we would be able to determine which location in the ring buffer was a marker (because we were storing the obstacle data in the struct), but we didn’t know where marker itself was located on the VGA screen, since the head and tail pointers of the ring buffer are constantly shifting.
+
+After adding this additional state information, horizontal wrapping for the track itself became a simple series of checks to see if the newly generated track element (pixel) would be within the [0, 640) pixel range. If it is outside of the range, just wrap the new pixel corresponding to whichever track side (l_xpos or r_xpos) over to the other side. 
+
+Erasing of these track pixels each frame was also made significantly easier with the inclusion of y_pos in the struct, as now calling two fillRects on (l_xpos, y_pos) and (r_xpos, y_pos), coloring them black, will be sufficient. 
+
+#### Horizontal Wrapping (Car)
+
+
+
+
+#### Spotify API
+
+From a system level, the Pico was communicating to a laptop via UART in a 
+Setup for the Spotify portion of the system was relatively smooth, in part due to the Spotipy Python library and due to its extensive documentation. 
+ 
+On the Python side, environment variables dealing with authentication with my Spotify account are set. Then, a serial monitor is opened to listened to the Pico’s messages. After that, a Spotipy function is called that queries the Spotify API to return the songs of a playlist (playlist_tracks()) and associated data, from which the tempo is extracted. The returned list of songs is then sorted by tempo. 
+ 
+On the C side, a signal_spotify variable was used as the signal the Spotify API to skip to the next (faster) track in the list. The char was initialized to ‘A’. When a marker is hit, the char is set to ‘N’, and the other thread is constantly checking for if signal_spotify is set to ‘N’. If so, the ‘next’ UART message is sent to the laptop, and signal_spotify is reset immediately after. As was mentioned earlier, there was no problem with race conditions in accessing this data/managing UART, as the C code was only writing to UART and the Python was only reading from UART. 
+The ‘rese’ UART message is set when the entire game is reset (after a collision and the reset button is pressed).
+ 
+Upon receiving a ‘next’ message on the Python side, the next song of increasing tempo (from the list) is played. Upon receiving a ‘rese’ message on the Python side, the next song that is played is the first one on the playlist. The Python code implementing this logic is below. 
+
+![image](spotify_code.png)
+
+#### Optimizations
+
+Two major optimizations aided in reduced overhead for our game. The first involved adopting and interrupt-based IMU data-read strategy. Rather than sampling at pwm triggered intervals or performing a blocking data-available read, this strategy only triggered the i2c read and write when the IMU’s interrupt pin goes high. The trigger of the MPU6050’s interrupt pin indicates that new values are available in the data buffer for reading. This approach significantly reduces the number of times the threads are unnecessarily interrupted even when new data is not ready. This was achieved by editing the provided accelerometer read and write files by enabling pulse-based interrupts through register 0x37. 
+
+The second optimization explored dealt with the VGA. As opposed to erasing the entire screen per frame update, only pixels that are currently active are erased. These pixels include the road, the car, the markers, and the score area. This strategy avoids the flickering effect from when the entire screen is erased and frees up several frames for other game-related computations. 
+
+
+
 
 
 
