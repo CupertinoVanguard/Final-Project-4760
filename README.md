@@ -24,6 +24,7 @@ Lastly, for the marker collision, a decision was made to only count the collisio
 The hardware for our controller is straightforward and concise. All circuitry is done on a single breadboard and the wiring is neatly organized to avoid complications. Below we have detailed every component of the hardware as well as many diagrams and pictures of the circuitry.
 
 ![image](connection_diagram.png)
+*Figure 1: Overall Hardware Setup*
 
 ### High Level Software Design
 
