@@ -84,7 +84,7 @@ The ring buffer, in this way, facilitated expanding the state properties of the 
  
 It was a little difficult to understand how the ring buffer was operating (two pointers chasing each other around a static memory space), but it was worth spending some time to understand it, as the relative performance increase due to using a ring buffer was necessary to implement functional scrolling. 
 
-![image](road_prop.png)
+![image](road_prop_2.png)
 *Figure 5: Image of struct utilized*
 
 Road_prop is the struct that was used to keep track of all of the data associated with a particular pixel on the track. The reason for having to keep track of all of this positional state information (l_xpos, r_xpos, y_pos) for each ring buffer track element was due to the challenges of wrapping and erasing previously drawn elements. This motivation will be covered in greater detail in the wrapping description section. 
