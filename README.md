@@ -179,7 +179,9 @@ A good minimum separation for pixels to be placed on the track was also qualitat
 
 ## Conclusion
 
-Overall, we are very satisfied with how our project turned out. The game was similar to how we envisioned it to be and meets most of our expectations. It runs smoothly, is easy to pick up and play, and provides interactive feedback. However, there are a few features we were unable to implement such as audio feedback directly from the controller and some extra game details like power ups. From this project there are few things we learned going forward. Firstly, it is important to try and finalize and commit to a design early on. Lacking a clear goal and direction early on led to a lot of wasted time. 
+Overall, we are very satisfied with how our project turned out. The game was similar to how we envisioned it to be and meets most of our expectations. It runs smoothly, is easy to pick up and play, and provides interactive feedback. However, there are a few features we were unable to implement such as audio feedback directly from the controller and some extra game details like power ups. Additionally, from a technical perspective, we would have also liked to explore VGA pointers. VGA pointers was an idea suggested by Professor Land that would only involve erasing the top horixontal line of the vga as opposed to erasing every since active pixel. This would have certainly allowed us to achieve greater game speeds, increase the difficulty, and minimize flickering.
+
+From this project there are few things we learned going forward. Firstly, it is important to try and finalize and commit to a design early on. Lacking a clear goal and direction early on led to a lot of wasted time. 
 
 We did not run into any issues with patents and such because all of our hardware parts were gathered from resources in the lab, and almost all of our software was created from scratch. Some parts of the code were borrowed and modified from previous labs. We did use the open-source Spotipy wrapper to make Spotify API requests using Python, however. 
 
