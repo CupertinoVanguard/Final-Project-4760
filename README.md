@@ -23,7 +23,7 @@ Lastly, for the marker collision, a decision was made to only count the collisio
 
 The hardware for our controller is straightforward and concise. All circuitry is done on a single breadboard and the wiring is neatly organized to avoid complications. Below we have detailed every component of the hardware as well as many diagrams and pictures of the circuitry.
 
-1) Pico - Microcontroller in charge of running the game code, writing to the VGA screen, and taking input from the MPU-6050
+1) PICO - Microcontroller in charge of running the game code, writing to the VGA screen, and taking input from the MPU-6050
 
 2) VGA - Graphics screen that follows HSYNC and VSYNC protocol to display the track, car, and score.
 
