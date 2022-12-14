@@ -125,6 +125,18 @@ Upon receiving a ‘next’ message on the Python side, the next song of increas
 
 ![image](spotify_code.png)
 
+
+#### Reset/ Game End
+
+The below figure shows the message printed out to the player on the VGA (using provided VGA setCursor and writeString) when they hit a track boundary. To reset the game, we keep track of a boolean play_again, that is initially set to False. Our main code game loop runs when this variable is set to True, which is possible whenever the hardware button is pressed when the screen below is visible to the player. This loop variable is reset to False immediately after hitting a track boundary, breaking out of the main game loop.  
+
+![image](reset_game.png)
+
+The below figure shows the message printed out to the player when they win the game, which happens when 20 green markers have been hit. 
+
+![image](win_game.png)
+
+
 #### Optimizations
 
 Two major optimizations aided in reduced overhead for our game. The first involved adopting and interrupt-based IMU data-read strategy. Rather than sampling at pwm triggered intervals or performing a blocking data-available read, this strategy only triggered the i2c read and write when the IMU’s interrupt pin goes high. The trigger of the MPU6050’s interrupt pin indicates that new values are available in the data buffer for reading. This approach significantly reduces the number of times the threads are unnecessarily interrupted even when new data is not ready. This was achieved by editing the provided accelerometer read and write files by enabling pulse-based interrupts through register 0x37. 
@@ -132,6 +144,28 @@ Two major optimizations aided in reduced overhead for our game. The first involv
 The second optimization explored dealt with the VGA. As opposed to erasing the entire screen per frame update, only pixels that are currently active are erased. These pixels include the road, the car, the markers, and the score area. This strategy avoids the flickering effect from when the entire screen is erased and frees up several frames for other game-related computations. 
 
 
+
+## Design Results
+
+We were able to experiment with the MPU and found a good balance between the accelerometer and gyroscope that allowed for control to be responsive and accurate. 
+
+We made sure our device was safe by putting all the circuitry into a closed box and making sure there were no loose or exposed wires.
+The speed of the game was controlled by the spare_time yield within the main game thread. The default frame rate is 30 fps; however, the game gradually gets faster by reducing the spare time yield in between successive thread calls. The max spare time available when measured was approximate 23000 uS and the minimum is 3000 (if the user were to not miss any markers and win the game). Lowering the spare time thus creates the illusion of faster speeds but does eventually introduce flickering. 
+
+A good minimum separation for pixels to be placed on the track was also qualitatively tuned. The determined separation of 5 pixels in the y-direction seemed to look good when the game was being run, even at the higher speeds. Having this separation also allowed the ring buffer to be slightly smaller, which is more efficient in terms of storage (ultimately going with a size of 480 y-axis pixels/5 separation/pixel) = 96. 
+
+## Conclusion
+
+Overall, we are very satisfied with how our project turned out. The game was similar to how we envisioned it to be and meets most of our expectations. It runs smoothly, is easy to pick up and play, and provides interactive feedback. However, there are a few features we were unable to implement such as audio feedback directly from the controller and some extra game details like power ups. From this project there are few things we learned going forward. Firstly, it is important to try and finalize and commit to a design early on. Lacking a clear goal and direction early on led to a lot of wasted time. 
+
+We did not run into any issues with patents and such because all of our hardware parts were gathered from resources in the lab, and almost all of our software was created from scratch. Some parts of the code were borrowed and modified from previous labs. We did use the open-source Spotipy wrapper to make Spotify API requests using Python, however. 
+
+## Appendix A
+Project on the course page:
+The group approves this report for inclusion on the course website.
+
+Project on the course YouTube channel:
+The group approves the video for inclusion on the course youtube channel.
 
 
 
