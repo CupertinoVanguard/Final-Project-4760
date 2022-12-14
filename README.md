@@ -114,6 +114,10 @@ To translate the complementary angle to the vga screen, the value is simply divi
 
 #### Road Curvature
 
+In order to produce the random curves in the track visible in the game, a basic strategy was implemented. The track is broken down into linear segments of a randomly sampled length, sampled from the following range: [10,20,30,40,50,60,70]. The slope of the line (pixel increment in x-direction) is also randomly sampled within the following range: [-6,-4,-2,0,2,4,6]. A counter (init_curve) counts up to the randomly sampled length (curve_len), and increments each pixel that is plotted (+= 1 each frame) by the corresponding randomly sampled slope (inc_val). When init_curve == curve_len, init_curve is reset to 0 and the two random variables are resampled. In this way, the track randomly builds itself as time goes on. These parameters were qualitatively adjusted to make the game playable and fun. 
+
+![image](gameplay_img)
+
 #### Horizontal Wrapping (Road)
 
 Implementing horizontal wrapping for the road was probably one of the most challenging aspects of this project. The primary issue was that markers, erasing, and how the road itself wraps would have to change as a result of the road wrapping. 
@@ -125,9 +129,6 @@ It also became necessary to keep track of y_pos of each pixel in order to perfor
 After adding this additional state information, horizontal wrapping for the track itself became a simple series of checks to see if the newly generated track element (pixel) would be within the [0, 640) pixel range. If it is outside of the range, just wrap the new pixel corresponding to whichever track side (l_xpos or r_xpos) over to the other side. 
 
 Erasing of these track pixels each frame was also made significantly easier with the inclusion of y_pos in the struct, as now calling two fillRects on (l_xpos, y_pos) and (r_xpos, y_pos), coloring them black, will be sufficient. 
-
-#### Horizontal Wrapping (Car)
-
 
 ### Colliders
 
@@ -194,6 +195,18 @@ The group approves this report for inclusion on the course website.
 
 Project on the course YouTube channel:
 The group approves the video for inclusion on the course youtube channel.
+
+## Appendix B
+
+Datasheets:
+
+MPU6050: [1](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf)
+
+Contribution:
+
+Kevin Guo: Hardware Design - container design and circuit assembly
+Shreshta Obla: Software Design - Car and Road Wrapping, Curvatures, and Spotify
+Nikhil Satheesh Pillai: Software Design - Marker Generation, Speed, Optimization, Ring Buffer
 
 
 
