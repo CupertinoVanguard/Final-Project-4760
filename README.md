@@ -23,8 +23,24 @@ Lastly, for the marker collision, a decision was made to only count the collisio
 
 The hardware for our controller is straightforward and concise. All circuitry is done on a single breadboard and the wiring is neatly organized to avoid complications. Below we have detailed every component of the hardware as well as many diagrams and pictures of the circuitry.
 
+1) Pico - Microcontroller in charge of running the game code, writing to the VGA screen, and taking input from the MPU-6050
+2) VGA - Graphics screen that follows HSYNC and VSYNC protocol to display the track, car, and score.
+3) Breadboard - 16.6 cm by 5.6 cm breadboard that holds all the hardware circuitry.
+4) MPU_6050 - Gyroscope sensor attached to controller in order to measure acceleration and tilt angle. Data is used to move the vehicle on screen accordingly.
+5) Vibration Motor - Used to send vibration feedback whenever the player hits a marker. Controlled using PWM. 
+6) 2N3904 NPN - The transistor used in the vibration motor circuitry. Allows for better control of the motor.
+7) Push Button - A simple button used to start a new game or restart after a game over. It is attached to the outside of the controller.
+8) Cardboard Container - A cardboard rectangular prism, approximately 18 cm by 6 cm by 5 cm. All circuitry is encapsulated by the prism. There are holes on the side to allow wires from the VGA and laptop. Can be opened and closed to allow adjustments to the breadboard.
+
+
+
 ![image](connection_diagram.png)
 *Figure 1: Overall Hardware Setup*
+
+![image](vibration_motor.png)
+*Figure 2: Vibration Motor Circuitry*
+
+
 
 ### High Level Software Design
 
