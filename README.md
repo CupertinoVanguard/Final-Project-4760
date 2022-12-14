@@ -116,7 +116,7 @@ To translate the complementary angle to the vga screen, the value is simply divi
 
 In order to produce the random curves in the track visible in the game, a basic strategy was implemented. The track is broken down into linear segments of a randomly sampled length, sampled from the following range: [10,20,30,40,50,60,70]. The slope of the line (pixel increment in x-direction) is also randomly sampled within the following range: [-6,-4,-2,0,2,4,6]. A counter (init_curve) counts up to the randomly sampled length (curve_len), and increments each pixel that is plotted (+= 1 each frame) by the corresponding randomly sampled slope (inc_val). When init_curve == curve_len, init_curve is reset to 0 and the two random variables are resampled. In this way, the track randomly builds itself as time goes on. These parameters were qualitatively adjusted to make the game playable and fun. 
 
-![image](gameplay_img)
+![image](gameplay_img.png)
 
 #### Horizontal Wrapping (Road)
 
