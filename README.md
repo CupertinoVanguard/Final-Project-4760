@@ -109,6 +109,13 @@ Erasing of these track pixels each frame was also made significantly easier with
 #### Horizontal Wrapping (Car)
 
 
+### Colliders
+
+The most efficient way to implement collision was just to keep track of whether the top or bottom of the car is in collision, as depicted in Figure b. To do this, top_car_coll and bot_car_coll were pointers to locations in the ring buffer relative to the top of the ring buffer (pointerEnd), corresponding to the y-pixel positions of the top and bottom of the car. Each frame these pointers would also be incremented, along with pointerEnd, so they retained the same offset from the top of the VGA screen– since the car always maintains the same y-pos. 
+
+![image](colliders.png)
+
+The initial implementation of colliders for the track used basic equality operators to check if the current_x position of the car was within a specified range of the track. This doesn’t work too well with wrapping. The inclusion of l_xpos and r_xpos made checking for collisions easier as well, especially with car wrapping. The better strategy was to compute the absolute difference between the car’s position and the track boundaries, and if the difference was less than 2, report a collision. Essentially this meant comparing l_xpos and r_xpos corresponding to the top_car_coll and bot_car_coll to the current position of the car. 
 
 
 #### Spotify API
@@ -124,7 +131,6 @@ The ‘rese’ UART message is set when the entire game is reset (after a collis
 Upon receiving a ‘next’ message on the Python side, the next song of increasing tempo (from the list) is played. Upon receiving a ‘rese’ message on the Python side, the next song that is played is the first one on the playlist. The Python code implementing this logic is below. 
 
 ![image](spotify_code.png)
-
 
 #### Reset/ Game End
 
